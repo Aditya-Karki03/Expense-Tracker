@@ -1,13 +1,15 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
+import jwt from 'jsonwebtoken'
 import zod from 'zod'
 const app=express();
 const prisma=new PrismaClient();
 const signingRouter=express.Router()
 
+const secretKey:string=process.env.SECRET_KEY || '';
 
-//parse the body without the help of bodyparser(external library)
- signingRouter.use(express.json())
+signingRouter.use(express.json())
+
 
 const UserSigningUpDataValidator=zod.object({
     email:zod.string().email({message:'Invalid Email Address'}),
@@ -32,6 +34,13 @@ signingRouter.post('/signup',async(req,res)=>{
             data:userData
        })
 
+    const token=jwt.sign({
+        data:userCreated.id
+    },secretKey)
+
+    res.status(200);
+    return res.send(token)
+
     } catch (error) {
         res.status(400);
         return res.json({
@@ -47,6 +56,7 @@ const userSignInDataValidator=zod.object({
 
 signingRouter.post('/signin',async(req,res)=>{
     const userData=req.body
+    
     try {
         const{success}=userSignInDataValidator.safeParse(userData);
         if(!success){
@@ -68,10 +78,12 @@ signingRouter.post('/signin',async(req,res)=>{
                 msg:"No User Found!! Please try signing Up"
             })
         }
+        const token=jwt.sign({
+            data:findUserData.id
+        },process.env.SECRET_KEY|| '')
+        
         res.status(200)
-        return res.json({
-            msg:"User found successfully!!"
-        })
+        return res.send(token)
         
     } catch (error) {
         res.status(500);

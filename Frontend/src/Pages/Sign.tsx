@@ -1,11 +1,35 @@
 import { useState } from "react"
 import { Link } from "react-router-dom";
+import axios from "axios";
+import Spinner from "../Components/Spinner";
 
 export default function Sign(){
     const[signIn,setSignIn]=useState(true);
+    const[loading,setLoading]=useState(false)
+    const[firstname,setFirstname]=useState('');
+    const[lastname,setLastname]=useState('');
+    const[email,setEmail]=useState('');
+    const[password,setPassword]=useState('')
+    
+    
+    
     function handleSign(){
         setSignIn(prev=>!prev)
     }
+
+    async function handleClick(){
+        setLoading(prev=>!prev)
+        const token=await axios.post(`http://localhost:3000/api/v1/user/${signIn?'signin':'signup'}`,{
+                firstname,
+                lastname,
+                email,
+                password
+            
+        })
+        localStorage.setItem('token',JSON.stringify(token))
+        setLoading(prev=>!prev)
+    }
+
     return(
        <div className="w-screen h-screen flex justify-center items-center bg-[#0F0F0F]">
             <div className="w-full max-w-sm p-6 m-auto mx-auto bg-white rounded-lg shadow-md dark:bg-gray-800">
@@ -15,19 +39,19 @@ export default function Sign(){
 
             <form className="mt-6">
                 <div>
-                    <label  className="block text-sm text-gray-800 dark:text-gray-200">Email</label>
-                    <input type="text" className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40" />
+                    <label className="block text-sm text-gray-800 dark:text-gray-200">Email</label>
+                    <input onChange={(e)=>setEmail(e.target.value)} value={email} type="text" className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40" />
                 </div>
                 {
                     !signIn && (
                         <div className="mt-4">
                             <div>
-                                <label  className="block text-sm text-gray-800 dark:text-gray-200">Firstname</label>
-                                <input type="text" className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40" />
+                                <label className="block text-sm text-gray-800 dark:text-gray-200">Firstname</label>
+                                <input onChange={e=>setFirstname(e.target.value)} value={firstname} type="text" className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40" />
                             </div>
                             <div className="mt-4">
                                 <label  className="block text-sm text-gray-800 dark:text-gray-200">Lastname</label>
-                                <input type="text" className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40" />
+                                <input onChange={e=>setLastname(e.target.value)} value={lastname} type="text" className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40" />
                             </div>
                         </div>
                     )
@@ -39,13 +63,16 @@ export default function Sign(){
                             signIn && <Link to="#" className="text-xs text-gray-600 dark:text-gray-400 hover:underline">Forget Password?</Link>
                         }                        
                     </div>
-
-                    <input type="password" className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40" />
+ 
+                    <input onChange={e=>setPassword(e.target.value)} value={password} type="password" className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border rounded-lg dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 dark:focus:border-blue-300 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40" />
                 </div>
 
                 <div className="mt-6">
-                    <button className="w-full px-6 py-2.5 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50">
-                        {signIn?'Sign In':'Sign Up'}
+                    <button onClick={handleClick} className="w-full flex justify-center items-center px-6 py-2.5 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50">
+                        {!loading && (signIn?'Sign In':'Sign Up')}
+                        {
+                            loading && <Spinner/>
+                        }
                     </button>
                 </div>
             </form>
