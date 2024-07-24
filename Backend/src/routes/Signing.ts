@@ -29,6 +29,18 @@ signingRouter.post('/signup',async(req,res)=>{
                 msg:'You Sent Wrong Input!'
             })
        }
+       //check if the user already exist
+       const userExist=await prisma.users.findFirst({
+        where:{
+            email:userData.email
+        }
+       })
+       if(userExist){
+            res.status(403);
+            return res.json({
+                msg:'Already registered Email!! Please sign in!'
+            })
+       }
 
        const userCreated=await prisma.users.create({
             data:userData

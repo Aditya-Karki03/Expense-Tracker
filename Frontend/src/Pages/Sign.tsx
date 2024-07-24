@@ -1,6 +1,8 @@
 import { useState } from "react"
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Spinner from "../Components/Spinner";
 
 export default function Sign(){
@@ -17,17 +19,38 @@ export default function Sign(){
         setSignIn(prev=>!prev)
     }
 
-    async function handleClick(){
+    async function handleClick(e:React.MouseEvent<HTMLButtonElement>){
+        e.preventDefault();
         setLoading(prev=>!prev)
-        const token=await axios.post(`http://localhost:3000/api/v1/user/${signIn?'signin':'signup'}`,{
+        
+        try {
+            const response=await axios.post(`http://localhost:3000/api/v1/user/${signIn?'signin':'signup'}`,{
+                email,    
                 firstname,
                 lastname,
-                email,
                 password
             
         })
-        localStorage.setItem('token',JSON.stringify(token))
-        setLoading(prev=>!prev)
+            if(response.data){
+                (function notify(){
+                    toast('Successfully Signed In!')
+                })();
+                localStorage.setItem('token',response.data)
+                setLoading(prev=>!prev)
+            }
+        } catch (error) {
+            toast.error('Something went wrong! Please try again!',{
+                position:'top-right'
+            })
+            setLoading(prev=>!prev)
+        }
+
+
+       
+         
+        
+        
+        
     }
 
     return(
@@ -68,12 +91,13 @@ export default function Sign(){
                 </div>
 
                 <div className="mt-6">
-                    <button onClick={handleClick} className="w-full flex justify-center items-center px-6 py-2.5 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50">
+                    <button onClick={(e)=>handleClick(e)} className="w-full flex justify-center items-center px-6 py-2.5 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50">
                         {!loading && (signIn?'Sign In':'Sign Up')}
                         {
                             loading && <Spinner/>
                         }
                     </button>
+                    <ToastContainer />
                 </div>
             </form>
 
