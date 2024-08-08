@@ -18,9 +18,19 @@ model Users{
   firstname String
   lastname String 
   email String @unique
-  password String
+  password String?
   MoneyUsage UsersMoney[]
-   
+  ExpensesOfUser  Expenses[]
+}
+
+model Expenses{
+  id Int @id @default(autoincrement())
+  amount Int
+  date DateTime @default(now())
+  category String
+  description String?
+  expensesByUser Users @relation(fields: [userId], references: [id])
+  userId Int
 }
 
 model UsersMoney{
